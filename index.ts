@@ -6,7 +6,7 @@ import * as url from 'url';
 export interface IOptions {
     url: string;
     method: 'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'TRACE'|'OPTIONS'|'CONNECT'|'PATCH';
-    headers?: any;
+    headers?: { [header: string]: string };
     payload?: any;
     timeout?: number;
     proxy?: string;
@@ -55,7 +55,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             // handle redirections
             if ((res.statusCode >= 300 || res.statusCode <= 399)
                 && options.maxRedirs > 0 && res.headers['location']) {
-                options.url = url.resolve(options.url, res.headers['location']);
+                options.url = url.resolve(options.url, res.headers['location'] as string);
                 options.maxRedirs--;
                 delete headers['host'];
                 handled = true;

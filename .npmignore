@@ -1,1 +1,5 @@
+.npmignore
+.gitignore
 node_modules/
+tsconfig.json
+tslint.json
