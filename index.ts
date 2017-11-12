@@ -2,10 +2,12 @@ import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
 import * as url from 'url';
+import * as zlib from 'zlib';
 
 export interface IOptions {
     url: string;
     method: 'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'TRACE'|'OPTIONS'|'CONNECT'|'PATCH';
+    compression?: boolean;
     headers?: { [header: string]: string };
     payload?: any;
     timeout?: number;
@@ -36,6 +38,10 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             headers['host'] = serverUrl.host;
         }
 
+        if (options.compression && !headers['accept-encoding']) {
+            headers['accept-encoding'] = 'gzip, deflate';
+        }
+
         options.maxRedirs = (options.maxRedirs === undefined) ? 10 : +options.maxRedirs;
 
         if (typeof options.payload === 'object' && !headers['content-type']) {
@@ -61,18 +67,44 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 handled = true;
                 resolve(httpreq(options));
             } else {
+                const zlibOptions = {
+                    flush: zlib.Z_SYNC_FLUSH,
+                    finishFlush: zlib.Z_SYNC_FLUSH
+                }
                 let data = '';
-                res.on('data', (chunk: string) => {
-                    data += chunk;
-                });
-                res.on('end', () => {
-                    handled = true;
-                    resolve({
-                        response: res,
-                        body: data,
-                    });
-                });
-                res.on('error', (e: any) => reject(e));
+                const
+                    onData = (chunk: Buffer) => data += chunk.toString(),
+                    onEnd = () => {
+                        handled = true;
+                        resolve({
+                            response: res,
+                            body: data,
+                        });
+                    },
+                    onError = (e: any) => reject(e);
+                switch (res.headers['content-encoding']) {
+                    case 'gzip':
+                        handled = true;
+                        const gunzip = zlib.createGunzip(zlibOptions);
+                        gunzip.on('data', onData);
+                        gunzip.on('end', onEnd);
+                        gunzip.on('error', onError);
+                        res.pipe(gunzip);
+                        break;
+                    case 'deflate':
+                        handled = true;
+                        const inflate = zlib.createInflate(zlibOptions);
+                        gunzip.on('data', onData);
+                        gunzip.on('end', onEnd);
+                        gunzip.on('error', onError);
+                        res.pipe(inflate);
+                        break;
+                    default:
+                        res.on('data', onData);
+                        res.on('end', onEnd);
+                        res.on('error', onError);
+                        break;
+                }
             }
         });
         req.on('error', (e: any) => reject(e));

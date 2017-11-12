@@ -23,6 +23,7 @@ All options:
 {
     url: string;
     method: 'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'TRACE'|'OPTIONS'|'CONNECT'|'PATCH';
+    compression?: boolean;
     headers?: any;
     payload?: any;
     timeout?: number;
