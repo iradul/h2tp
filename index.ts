@@ -16,6 +16,7 @@ export interface IOptions {
 }
 
 export interface IResult {
+    request: http.ClientRequest,
     response: http.IncomingMessage;
     body: string;
 }
@@ -77,6 +78,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                     onEnd = () => {
                         handled = true;
                         resolve({
+                            request: req,
                             response: res,
                             body: data,
                         });
