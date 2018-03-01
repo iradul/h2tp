@@ -1,7 +1,7 @@
 {
   "name": "h2tp",
-  "version": "1.1.0",
-  "description": "Super simple HTTP request module",
+  "version": "2.0.0",
+  "description": "Simple HTTP request module with zero dependencies",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/iradul/h2tp/issues"
   },
-  "homepage": "https://github.com/iradul/h2tp#readme"
+  "homepage": "https://github.com/iradul/h2tp#readme",
+  "devDependencies": {
+    "@types/node": "^9.4.6"
+  }
 }
