@@ -43,6 +43,10 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             headers['accept-encoding'] = 'gzip, deflate';
         }
 
+        if (options.timeout === undefined) {
+            options.timeout = 120000;
+        }
+
         options.maxRedirs = (options.maxRedirs === undefined) ? 10 : +options.maxRedirs;
 
         if (typeof options.payload === 'object' && !headers['content-type']) {
