@@ -24,7 +24,7 @@ export interface IResult {
 export function httpreq(opt: IOptions | string): Promise<IResult> {
     return new Promise<IResult>((resolve, reject) => {
         const options: IOptions = (typeof opt === 'string') ? { url: opt as string, method: 'GET' } : opt,
-            isHTTPS = /^https/.test(options.url),
+            isHTTPS = /^https/.test(options.proxy || options.url),
             serverUrl = url.parse(options.proxy ? options.proxy : options.url),
             headers = {};
         let handled = false;
@@ -35,8 +35,8 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             });
         }
 
-        if (!options.proxy && !headers['host']) {
-            headers['host'] = serverUrl.host;
+        if (!headers['host']) {
+            headers['host'] = url.parse(options.url).host;
         }
 
         if (options.compression && !headers['accept-encoding']) {
