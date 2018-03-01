@@ -1,2 +1,7 @@
-*.js
 node_modules/
+.vscode/
+test.*
+*.map
+*.js
+*.d.ts
+package-lock.json
