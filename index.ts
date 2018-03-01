@@ -16,7 +16,7 @@ export interface IOptions {
 }
 
 export interface IResult {
-    request: http.ClientRequest,
+    request: http.ClientRequest;
     response: http.IncomingMessage;
     body: string;
 }
@@ -70,8 +70,8 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             } else {
                 const zlibOptions = {
                     flush: zlib.Z_SYNC_FLUSH,
-                    finishFlush: zlib.Z_SYNC_FLUSH
-                }
+                    finishFlush: zlib.Z_SYNC_FLUSH,
+                };
                 let data = '';
                 const
                     onData = (chunk: Buffer) => data += chunk.toString(),
