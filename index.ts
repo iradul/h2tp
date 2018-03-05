@@ -29,6 +29,8 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             headers = {};
         let handled = false;
 
+        options.url = new url.URL(options.url).toString();
+
         if (options.headers) {
             Object.keys(options.headers).forEach((header) => {
                 headers[header.toLowerCase().trim()] = options.headers[header];
