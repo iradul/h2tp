@@ -66,7 +66,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             headers,
         }, (res) => {
             // handle redirections
-            if ((res.statusCode >= 300 || res.statusCode <= 399)
+            if (res.statusCode >= 300 && res.statusCode <= 399
                 && options.maxRedirs > 0 && res.headers['location']) {
                 options.url = url.resolve(options.url, res.headers['location'] as string);
                 options.maxRedirs--;
