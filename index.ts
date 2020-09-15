@@ -13,6 +13,7 @@ export interface IOptions {
     timeout?: number;
     proxy?: string;
     maxRedirs?: number;
+    onData?: (chunk: Buffer | string) => void;
 }
 
 export interface IResult {
@@ -80,7 +81,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 };
                 let data = '';
                 const
-                    onData = (chunk: Buffer) => data += chunk.toString(),
+                    onData = options.onData ? options.onData : (chunk: Buffer) => data += chunk.toString(),
                     onEnd = () => {
                         handled = true;
                         resolve({

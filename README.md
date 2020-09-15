@@ -8,7 +8,7 @@ H2TP.httpreq('http://example.com').then((r) => console.log(r.body));
 H2TP.httpreq({
     url: 'http://example.com',
     method: 'POST',
-    payload: { data: "dummy" }, // since it's JavaScript object, it will be submitted with [Content-Type:application/json]
+    payload: { data: "dummy" }, // since it's JavaScript object, it will be submitted as [Content-Type:application/json]
 }).then((r) => {
     const data = r.body.trim();
     console.log(data);
@@ -29,6 +29,7 @@ All options:
     timeout?: number;
     proxy?: string;
     maxRedirs?: number;
+    onData?: (chunk: Buffer | string) => void;
 }
 */
 
