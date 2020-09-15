@@ -30,12 +30,17 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             headers = {};
         let handled = false;
 
-        options.url = new url.URL(options.url).toString();
+        const u = new url.URL(options.url);
+        options.url = url.format(u, { auth: false });
 
         if (options.headers) {
             Object.keys(options.headers).forEach((header) => {
                 headers[header.toLowerCase().trim()] = options.headers[header];
             });
+        }
+
+        if (!headers['authorization'] && (u.username || u.password)) {
+            headers['authorization'] = `Basic ${Buffer.from(`${u.username}:${u.password}`).toString('base64')}`;
         }
 
         if (!headers['host']) {
