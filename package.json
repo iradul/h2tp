@@ -1,6 +1,6 @@
 {
   "name": "h2tp",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Simple HTTP request module with zero dependencies",
   "main": "index.js",
   "repository": {
