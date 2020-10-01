@@ -125,7 +125,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
         req.on('error', (e: any) => reject(e));
         req.on('close', () => {
             if (!handled) {
-                reject(new Error(`Never got the response while requesting [${options.method}] ${options.url}`));
+                reject(new Error(`Connection closed while requesting [${options.method}] ${options.url}`));
             }
         });
         req.once('socket', (socket: net.Socket) => {
