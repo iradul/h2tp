@@ -14,6 +14,7 @@ export interface IOptions {
     proxy?: string;
     maxRedirs?: number;
     onData?: (chunk: Buffer | string) => void;
+    onSocket?: (socket: net.Socket) => void;
 }
 
 export interface IResult {
@@ -127,12 +128,15 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 reject(new Error(`Never got the response while requesting [${options.method}] ${options.url}`));
             }
         });
-        if (options.timeout) {
-            req.on('socket', (socket: net.Socket) => {
+        req.once('socket', (socket: net.Socket) => {
+            if (options.onSocket) {
+                options.onSocket(socket);
+            }
+            if (options.timeout) {
                 socket.setTimeout(options.timeout);
                 socket.on('timeout', () => req.abort());
-            });
-        }
+            }
+        });
         if (options.payload) req.end(options.payload);
         else req.end();
     });

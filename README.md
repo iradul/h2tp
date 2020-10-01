@@ -30,6 +30,7 @@ All options:
     proxy?: string;
     maxRedirs?: number;
     onData?: (chunk: Buffer | string) => void;
+    onSocket?: (socket: net.Socket) => void;
 }
 */
 
