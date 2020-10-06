@@ -29,6 +29,7 @@ All options:
     timeout?: number;
     proxy?: string;
     maxRedirs?: number;
+    agent?: http.Agent | https.Agent;
     onData?: (chunk: Buffer | string) => void;
     onSocket?: (socket: net.Socket) => void;
 }
