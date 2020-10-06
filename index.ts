@@ -13,6 +13,7 @@ export interface IOptions {
     timeout?: number;
     proxy?: string;
     maxRedirs?: number;
+    agent?: http.Agent | https.Agent;
     onData?: (chunk: Buffer | string) => void;
     onSocket?: (socket: net.Socket) => void;
 }
@@ -63,15 +64,21 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             options.payload = JSON.stringify(options.payload);
         }
 
-        const r = (isHTTPS) ? https.request : http.request;
-        const req = r({
+        const config: http.RequestOptions = {
             protocol: serverUrl.protocol,
             host: serverUrl.hostname,
             port: serverUrl.port ? +serverUrl.port : undefined,
             method: options.method,
             path: options.proxy ? options.url : serverUrl.path,
             headers,
-        }, (res) => {
+        };
+
+        if (options.agent !== undefined) {
+            config.agent = options.agent;
+        }
+
+        const r = (isHTTPS) ? https.request : http.request;
+        const req = r(config, (res) => {
             // handle redirections
             if (res.statusCode >= 300 && res.statusCode <= 399
                 && options.maxRedirs > 0 && res.headers['location']) {
