@@ -22,6 +22,7 @@ export interface IResult {
     request: http.ClientRequest;
     response: http.IncomingMessage;
     body: string;
+    redirections: string[];
 }
 
 export function httpreq(opt: IOptions | string): Promise<IResult> {
@@ -77,12 +78,16 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             config.agent = options.agent;
         }
 
+        const redirections: string[] = [];
+
         const r = (isHTTPS) ? https.request : http.request;
         const req = r(config, (res) => {
             // handle redirections
             if (res.statusCode >= 300 && res.statusCode <= 399
                 && options.maxRedirs > 0 && res.headers['location']) {
-                options.url = url.resolve(options.url, res.headers['location'] as string);
+                const redirUrl = url.resolve(options.url, res.headers['location'] as string);
+                redirections.push(redirUrl);
+                options.url = redirUrl;
                 options.maxRedirs--;
                 delete headers['host'];
                 handled = true;
@@ -101,6 +106,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                             request: req,
                             response: res,
                             body: data,
+                            redirections,
                         });
                     },
                     onError = (e: any) => reject(e);
