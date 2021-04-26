@@ -16,6 +16,7 @@ export interface IOptions {
     agent?: http.Agent | https.Agent;
     onData?: (chunk: Buffer | string) => void;
     onSocket?: (socket: net.Socket) => void;
+    onRequest?: (req: http.ClientRequest) => void;
 }
 
 export interface IResult {
@@ -150,6 +151,9 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 socket.on('timeout', () => req.abort());
             }
         });
+        if (options.onRequest) {
+            options.onRequest(req);
+        }
         if (options.payload) req.end(options.payload);
         else req.end();
     });

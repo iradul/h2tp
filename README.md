@@ -32,6 +32,7 @@ All options:
     agent?: http.Agent | https.Agent;
     onData?: (chunk: Buffer | string) => void;
     onSocket?: (socket: net.Socket) => void;
+    onRequest?: (req: http.ClientRequest) => void;
 }
 */
 
