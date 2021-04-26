@@ -123,9 +123,9 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                     case 'deflate':
                         handled = true;
                         const inflate = zlib.createInflate(zlibOptions);
-                        gunzip.on('data', onData);
-                        gunzip.on('end', onEnd);
-                        gunzip.on('error', onError);
+                        inflate.on('data', onData);
+                        inflate.on('end', onEnd);
+                        inflate.on('error', onError);
                         res.pipe(inflate);
                         break;
                     default:
