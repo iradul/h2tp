@@ -1,6 +1,6 @@
 {
   "name": "h2tp",
-  "version": "2.4.2",
+  "version": "2.4.4",
   "description": "Simple HTTP request module with zero dependencies",
   "main": "index.js",
   "repository": {
@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/iradul/h2tp#readme",
   "devDependencies": {
-    "@types/node": "^9.4.6"
+    "@types/node": "^14.0.0"
   }
 }
