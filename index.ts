@@ -33,6 +33,13 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             serverUrl = url.parse(options.proxy ? options.proxy : options.url),
             headers = {};
         let handled = false;
+        let tid: any;
+        const handle = () => {
+            if (!handled) {
+                handled = true;
+                clearTimeout(tid);
+            }
+        }
 
         const u = new url.URL(options.url);
         options.url = url.format(u, { auth: false });
@@ -91,7 +98,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 options.url = redirUrl;
                 options.maxRedirs--;
                 delete headers['host'];
-                handled = true;
+                handle();
                 resolve(httpreq(options));
             } else {
                 const zlibOptions = {
@@ -102,7 +109,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 const
                     onData = options.onData ? options.onData : (chunk: Buffer) => data += chunk.toString(),
                     onEnd = () => {
-                        handled = true;
+                        handle();
                         resolve({
                             request: req,
                             response: res,
@@ -113,7 +120,6 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                     onError = (e: any) => reject(e);
                 switch (res.headers['content-encoding']) {
                     case 'gzip':
-                        handled = true;
                         const gunzip = zlib.createGunzip(zlibOptions);
                         gunzip.on('data', onData);
                         gunzip.on('end', onEnd);
@@ -121,7 +127,6 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                         res.pipe(gunzip);
                         break;
                     case 'deflate':
-                        handled = true;
                         const inflate = zlib.createInflate(zlibOptions);
                         inflate.on('data', onData);
                         inflate.on('end', onEnd);
@@ -139,6 +144,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
         req.on('error', (e: any) => reject(e));
         req.on('close', () => {
             if (!handled) {
+                handle();
                 reject(new Error(`Connection closed while requesting [${options.method}] ${options.url}`));
             }
         });
@@ -146,11 +152,12 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             if (options.onSocket) {
                 options.onSocket(socket);
             }
-            if (options.timeout) {
-                socket.setTimeout(options.timeout);
-                socket.on('timeout', () => req.abort());
-            }
         });
+        if (options.timeout) {
+            tid = setTimeout(() => {
+                req.destroy();
+            }, options.timeout)
+        }
         if (options.onRequest) {
             options.onRequest(req);
         }
