@@ -156,6 +156,8 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
         if (options.timeout) {
             tid = setTimeout(() => {
                 req.destroy();
+                handle();
+                reject(new Error(`Timeout [${options.timeout}ms] while requesting [${options.method}] ${options.url}`));
             }, options.timeout)
         }
         if (options.onRequest) {
