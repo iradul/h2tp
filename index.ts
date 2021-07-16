@@ -33,6 +33,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
             serverUrl = url.parse(options.proxy ? options.proxy : options.url),
             headers = {};
         let handled = false;
+        let responded = false;
         let tid: any;
         const handle = () => {
             if (!handled) {
@@ -90,6 +91,7 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
 
         const r = (isHTTPS) ? https.request : http.request;
         const req = r(config, (res) => {
+            responded = true;
             // handle redirections
             if (res.statusCode >= 300 && res.statusCode <= 399
                 && options.maxRedirs > 0 && res.headers['location']) {
@@ -102,22 +104,29 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 resolve(httpreq(options));
             } else {
                 const zlibOptions = {
-                    flush: zlib.Z_SYNC_FLUSH,
-                    finishFlush: zlib.Z_SYNC_FLUSH,
+                    flush: zlib.constants.Z_SYNC_FLUSH,
+                    finishFlush: zlib.constants.Z_SYNC_FLUSH,
                 };
                 let data = '';
                 const
                     onData = options.onData ? options.onData : (chunk: Buffer) => data += chunk.toString(),
                     onEnd = () => {
-                        handle();
-                        resolve({
-                            request: req,
-                            response: res,
-                            body: data,
-                            redirections,
-                        });
+                        if (!handled) {
+                            handle();
+                            resolve({
+                                request: req,
+                                response: res,
+                                body: data,
+                                redirections,
+                            });
+                        }
                     },
-                    onError = (e: any) => reject(e);
+                    onError = (e: any) => {
+                        if (!handled) {
+                            handle();
+                            reject(e);
+                        }
+                    };
                 switch (res.headers['content-encoding']) {
                     case 'gzip':
                         const gunzip = zlib.createGunzip(zlibOptions);
@@ -141,9 +150,14 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
                 }
             }
         });
-        req.on('error', (e: any) => reject(e));
+        req.on('error', (e: any) => {
+            if (!responded && !handled) {
+                handle();
+                reject(e);
+            }
+        });
         req.on('close', () => {
-            if (!handled) {
+            if (!responded && !handled) {
                 handle();
                 reject(new Error(`Connection closed while requesting [${options.method}] ${options.url}`));
             }
@@ -155,9 +169,11 @@ export function httpreq(opt: IOptions | string): Promise<IResult> {
         });
         if (options.timeout) {
             tid = setTimeout(() => {
-                req.destroy();
-                handle();
-                reject(new Error(`Timeout [${options.timeout}ms] while requesting [${options.method}] ${options.url}`));
+                if (!handled) {
+                    req.destroy();
+                    handle();
+                    reject(new Error(`Timeout [${options.timeout}ms] while requesting [${options.method}] ${options.url}`));
+                }
             }, options.timeout)
         }
         if (options.onRequest) {
