@@ -23,11 +23,12 @@ All options:
 {
     url: string;
     method: 'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'TRACE'|'OPTIONS'|'CONNECT'|'PATCH';
-    compression?: boolean;
+    compression?: boolean; // default: true
     headers?: any;
     payload?: any;
     timeout?: number;
     proxy?: string;
+    proxyTunneling?: boolean; // default: true
     maxRedirs?: number;
     agent?: http.Agent | https.Agent;
     onData?: (chunk: Buffer | string) => void;
