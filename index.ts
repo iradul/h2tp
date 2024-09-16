@@ -214,7 +214,7 @@ export async function httpreq(opt: IOptions | string): Promise<IResult> {
         host: serverUrl.hostname,
         port: serverUrl.port ? +serverUrl.port : undefined,
         method: options.method,
-        path: options.proxy && !isProxyTunneling ? options.url : serverUrl.pathname,
+        path: options.proxy && !isProxyTunneling ? options.url : serverUrl.pathname + serverUrl.search,
         headers,
     };
 
