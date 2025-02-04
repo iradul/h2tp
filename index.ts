@@ -75,7 +75,7 @@ function execRequest(options: IOptions, config: http.RequestOptions, isHTTPS: bo
             // handle redirections
             if (res.statusCode >= 300 && res.statusCode <= 399
                 && options.maxRedirs > 0 && res.headers['location']) {
-                const redirUrl = new URL(options.url, res.headers['location'] as string).toString();
+                const redirUrl = new URL(res.headers['location'] as string, options.url).toString();
                 redirections.push(redirUrl);
                 options.url = redirUrl;
                 options.maxRedirs--;
